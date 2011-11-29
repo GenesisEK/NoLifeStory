@@ -6,7 +6,6 @@
 *.psess
 *.vsp
 *.log
-*.mp3
 *.exe
 *.pdb
 *.lib
@@ -22,3 +21,12 @@
 *.ipch
 *.o
 *.unsuccessfullbuild
+*.unsuccessfulbuild
+*.dll
+*.wz
+*.zip
+*.7z
+*.xml
+*.codeanalysis
+*.codeanalysisast
+*.config

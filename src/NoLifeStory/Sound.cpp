@@ -20,6 +20,9 @@ NLS::Sound::Sound(SoundProperty* data) {
 }
 
 NLS::Sound& NLS::Sound::operator= (const Sound& other) {
+	if (data == other.data) {
+		return *this;
+	}
 	if (stream) {
 		BASS_StreamFree(stream);
 	}
@@ -43,4 +46,14 @@ void NLS::Sound::Play(bool loop) {
 
 void NLS::Sound::Stop() {
 	BASS_ChannelStop(stream);
+}
+
+void NLS::Sound::SetVolume(float value) {
+	BASS_ChannelSetAttribute(stream, BASS_ATTRIB_VOL, value);
+}
+
+float NLS::Sound::GetVolume() {
+	float value;
+	BASS_ChannelGetAttribute(stream, BASS_ATTRIB_VOL, &value);
+	return value;
 }

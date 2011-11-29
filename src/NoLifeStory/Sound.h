@@ -12,8 +12,10 @@ namespace NLS {
 		~Sound();
 		void Play(bool loop = false);
 		void Stop();
+		void SetVolume(float);
+		float GetVolume();
 	private:
 		uint32_t stream;
 		SoundProperty* data;
 	};
-};
+}

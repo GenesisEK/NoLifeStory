@@ -14,19 +14,19 @@ void NLS::Sprite::Draw(int x, int y, bool flipped, float alpha, float rotation) 
 	if (!data) {
 		return;
 	}
-	if (View.relative && !rotation) {
+	if (View::relative && !rotation) {
 		if (flipped) {
-			if (x+data->originx < View.x ||
-				y+data->height-data->originy < View.y ||
-				x-data->width+data->originx > View.x+800 ||
-				y-data->originy > View.y+600) {
+			if (x+data->originx < View::x ||
+				y+data->height-data->originy < View::y ||
+				x-data->width+data->originx > View::x+800 ||
+				y-data->originy > View::y+600) {
 				return;
 			}
 		} else {
-			if (x+data->width-data->originx < View.x ||
-				y+data->height-data->originy < View.y ||
-				x-data->originx > View.x+800 ||
-				y-data->originy > View.y+600) {
+			if (x+data->width-data->originx < View::x ||
+				y+data->height-data->originy < View::y ||
+				x-data->originx > View::x+800 ||
+				y-data->originy > View::y+600) {
 				return;
 			}
 		}
@@ -39,45 +39,49 @@ void NLS::Sprite::Draw(int x, int y, bool flipped, float alpha, float rotation) 
 	} else {
 		glTranslatef(-data->originx, -data->originy, 0);
 	}
-	glColor4f(1, 1, 1, alpha);
+	if (!Mindfuck) {
+		glColor4f(1, 1, 1, alpha);
+	}
 	GetTexture();
 	glBegin(GL_QUADS);
 	if (flipped) {
 		glTexCoord2f(1, 0);
 		glVertex2i(0, 0);
 		glTexCoord2f(0, 0);
-		glVertex2i(data->width, 0);
+		glVertex2i(data->fw, 0);
 		glTexCoord2f(0, 1);
-		glVertex2i(data->width, data->height);
+		glVertex2i(data->fw, data->fh);
 		glTexCoord2f(1, 1);
-		glVertex2i(0, data->height);
+		glVertex2i(0, data->fh);
 	} else {
 		glTexCoord2f(0, 0);
 		glVertex2i(0, 0);
 		glTexCoord2f(1, 0);
-		glVertex2i(data->width, 0);
+		glVertex2i(data->fw, 0);
 		glTexCoord2f(1, 1);
-		glVertex2i(data->width, data->height);
+		glVertex2i(data->fw, data->fh);
 		glTexCoord2f(0, 1);
-		glVertex2i(0, data->height);
+		glVertex2i(0, data->fh);
 	}
     glEnd();
 	glPopMatrix();
 }
 
 void NLS::Sprite::GetTexture() {
+	/*Caused issues with text drawing :|
 	static SpriteData* lastData = 0;
 	if (data == lastData) {
 		return;
 	}
 	lastData = data;
+	*/
 	if (!data) {
-		glBindTexture(GL_TEXTURE_2D, NULL);
+		glBindTexture(GL_TEXTURE_2D, 0);
 		return;
 	}
 	if (!data->loaded) {
 		if (!data->png) {
-			glBindTexture(GL_TEXTURE_2D, NULL);
+			glBindTexture(GL_TEXTURE_2D, 0);
 			return;
 		}
 		data->png->Parse();

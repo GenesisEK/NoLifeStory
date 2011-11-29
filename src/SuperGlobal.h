@@ -1,15 +1,25 @@
 //////////////////////////////////////////////////////////////////////////
 // Copyright 2011 Peter Atechian (Retep998)                             //
-// All code in this version of NLS (aside from the libraries),          //
+// Almost all code in this version of NLS (aside from the libraries),   //
 // was written by Retep998.                                             //
-// Contributers to previous versions include (in no particular order):  //
-// Calc0000                                                             //
-// Erwin Oeg1ma (Diamondo25)                                            //
+// Contributers to this and previous versions (in no particular order): //
+// Joe Witterschlenbagen (Calc0000)                                     //
+// Erwin Oegema (Diamondo25)                                            //
 // David (Jvlaple)                                                      //
 // Andy Turner (Inumedia)                                               //
 // Cedric Van Goethem (Csharp)                                          //
+// Martyn Cleroux (IWannaWin)                                           //
 // Anthony Wolfe Vaughn                                                 //
 // Nate Bender                                                          //
+// Mika Attila (SolvedSnake)                                            //
+// Thanks goes to the creators of maplelib and maplelib2:               //
+// Snow                                                                 //
+// jonyleeson                                                           //
+// haha01haha01                                                         //
+// HaHa                                                                 //
+// Other thanks goes to:                                                //
+// Koolk                                                                //
+// Spudgy                                                               //
 //////////////////////////////////////////////////////////////////////////
 // This file is part of NoLifeStory.                                    //
 //                                                                      //
@@ -26,18 +36,50 @@
 // You should have received a copy of the GNU General Public License    //
 // along with NoLifeStory.  If not, see <http://www.gnu.org/licenses/>. //
 //////////////////////////////////////////////////////////////////////////
-//TODO - Implement some serious compiler detection.
 #ifdef _WIN32
 #define NLS_WINDOWS
 #include <Windows.h>
 #elif defined(UNIX)
 #define NLS_UNIX
+#define NLS_NIX
 #elif defined(__linux)
 #define NLS_LINUX
+#define NLS_NIX
 #elif defined(MAC)
 #define NLS_MAC
+#define NLS_NIX
 #else
-#error "Unknown platform. Define either _WIN32, __linux, UNIX or MAC"
+#error "Unknown platform. Please specify your platform using preprocessor definitions."
+#endif
+
+#ifdef _MSC_VER
+#define NLS_MSVC
+#if _MSC_VER >= 1700
+#define NLS_CPP11
+#define NLS_TR2
+#define NLS_TR1
+#elif _MSC_VER >= 1600
+#define NLS_TR1
+#else
+#error "Upgrade your visual studio to VS10 or VS11"
+#endif
+#elif defined(__GNUC__)
+#if __GNUC__ < 4
+#error "Please upgrade your gcc"
+#elif __GNUC__ == 4
+#if __GNUC_MINOR__ < 6
+#error "Please upgrade your gcc"
+#endif
+#endif
+#define NLS_GCC
+#ifdef _GLIBCXX_HAS_GTHREADS
+#define NLS_CPP11
+#endif
+#ifdef __MINGW32__
+#define NLS_MINGW
+#endif
+#else
+#error "Unknown compiler"
 #endif
 
 //SFML
@@ -48,10 +90,10 @@
 #include <SFML/Window.hpp>
 
 //GLEW
-#ifdef NLS_LINUX
-#include <GL/glew.h>
-#else
+#ifdef NLS_WINDOWS
 #include <glew.h>
+#else
+#include <GL/glew.h>
 #endif
 
 //Zlib
@@ -61,35 +103,32 @@
 #include <bass.h>
 
 //The entire STL
-#include <algorithm>
-#ifdef NLS_WINDOWS
-#include <allocators>
-#endif
-#include <array>
-#ifdef VS11
+#ifdef NLS_CPP11
 #include <atomic>
+#include <chrono>
+#include <condition_variable>
+#include <csetjmp>
+#include <future>
+#include <mutex>
+#include <ratio>
+#include <thread>
 #endif
+#ifdef NLS_TR2
+#include <filesystem>
+#endif
+#include <algorithm>
+#include <array>
 #include <bitset>
 #include <cassert>
 #include <ccomplex>
 #include <cctype>
 #include <cerrno>
 #include <cfloat>
-#ifdef VS11
-#include <chrono>
-#endif
 #include <ciso646>
 #include <climits>
 #include <clocale>
 #include <cmath>
-#ifdef NLS_WINDOWS
-#include <codecvt>
-#endif
 #include <complex>
-#ifdef VS11
-#include <condition_variable>
-#include <csetjmp>
-#endif
 #include <csignal>
 #include <cstdarg>
 #include <cstddef>
@@ -102,20 +141,9 @@
 #include <cwctype>
 #include <deque>
 #include <exception>
-#ifdef VS11
-#include <filesystem>
-#endif
 #include <forward_list>
 #include <fstream>
 #include <functional>
-#ifdef VS11
-#include <future>
-#endif
-#include <hash_map>
-#include <hash_set>
-#ifdef VS10
-#include <initializer_list>
-#endif
 #include <iomanip>
 #include <ios>
 #include <iosfwd>
@@ -127,32 +155,19 @@
 #include <locale>
 #include <map>
 #include <memory>
-#ifdef VS11
-#include <mutex>
-#endif
 #include <new>
 #include <numeric>
 #include <ostream>
 #include <queue>
 #include <random>
-#ifdef VS11
-#include <ratio>
-#endif
 #include <regex>
-#ifdef VS11
-#include <scoped_allocator>
-#endif
 #include <set>
 #include <sstream>
 #include <stack>
 #include <stdexcept>
 #include <streambuf>
 #include <string>
-#include <strstream>
 #include <system_error>
-#ifdef VS11
-#include <thread>
-#endif
 #include <tuple>
 #include <type_traits>
 #include <typeindex>
@@ -163,8 +178,30 @@
 #include <valarray>
 #include <vector>
 using namespace std;
+#ifdef NLS_TR1
+using namespace std::tr1;
+#endif
+#ifdef NLS_TR2
+using namespace std::tr2;
+using namespace std::tr2::sys;
+#endif
+
+//Some other headers
+#ifndef NLS_TR2
+#include <sys/stat.h>
+#endif
+
+//Do some type checks
+#ifdef SFML_ENDIAN_BIG
+#error "Why are you using big endian???"
+#endif
+static_assert(sizeof(char) == 1, "Unsupported char size");
+static_assert(sizeof(wchar_t) == 2, "Unsupported wchar_t size");
 
 //And resources
 #ifdef NLS_WINDOWS
 #include "../resources/Resource.h"
 #endif
+
+//And AES
+#include "AES.h"

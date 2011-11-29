@@ -4,14 +4,11 @@
 ////////////////////////////////////////////////////
 
 namespace NLS {
-	class _Time {
-		sf::Clock clock;
-	public:
+	namespace Time {
 		void Reset();
 		void Step();
-		uint32_t delta;
-		uint32_t tdelta;
-		double fps;
-		bool output;
-	} extern Time;
-};
+		extern double delta;
+		extern double tdelta;
+		extern double fps;
+	};
+}

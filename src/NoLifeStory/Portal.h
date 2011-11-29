@@ -7,15 +7,16 @@ namespace NLS {
 	public:
 		void Draw();
 		static void Load(Node n);
+		static void Update();
 		int x, y;
-		bool close;
-		int pt, tm;
-		string pn, tn;
+		int pt;
+		string tm, pn, tn;
 		int hi, vi;
 		string script;
 		int onlyonce;
 		int delay;
 		int hidetooltip;
+		bool close;
 		static vector <Portal*> Portals;
 	};
-};
+}

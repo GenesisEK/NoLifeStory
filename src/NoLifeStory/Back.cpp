@@ -7,9 +7,7 @@
 set <NLS::Back*> NLS::Back::Backs;
 
 void NLS::Back::Load(Node n) {
-	for (auto it = Backs.begin(); it != Backs.end(); it++) {
-		delete *it;
-	}
+	for_each(Backs.begin(), Backs.end(), [](Back* b){delete b;});
 	Backs.clear();
 	n = n["back"];
 	for (auto it = n.begin(); it != n.end(); it++) {
@@ -29,7 +27,7 @@ void NLS::Back::Load(Node n) {
 		b->type = bn["type"];
 		Node bd = WZ["Map"]["Back"][type1];
 		if (!bd) {
-			C("ERROR") << "Failed to find background type " << type1 << endl;
+			cerr << "Failed to find background type " << type1 << endl;
 			delete b;
 			continue;
 		}
@@ -85,24 +83,24 @@ void NLS::Back::Draw() {
 	switch(movetype) {
 	case 1:
 		if (movep) {
-			ax = movew*sin((double)Time.tdelta*2*PI/movep);
+			ax = movew*sin((double)Time::tdelta*2*PI*1000/movep);
 		} else {
-			ax = movew*sin((double)Time.tdelta/1000);
+			ax = movew*sin((double)Time::tdelta);
 		}
 		break;
 	case 2:
 		if (movep) {
-			ay = moveh*sin((double)Time.tdelta*2*PI/movep);
+			ay = moveh*sin((double)Time::tdelta*2*PI*1000/movep);
 		} else {
-			ay = moveh*sin((double)Time.tdelta/1000);
+			ay = moveh*sin((double)Time::tdelta);
 		}
 		break;
 	case 3:
-		ang = (double)Time.tdelta/mover*radtodeg;
+		ang = (double)Time::tdelta*1000/mover*radtodeg;
 		break;
 	};
-	int ox = (100+rx)*(View.x+400)/100;
-	int oy = (100+ry)*(View.y+300)/100;
+	int ox = (100+rx)*(View::x+400)/100;
+	int oy = (100+ry)*(View::y+300)/100;
 	int orx = ogx-ogx%cx;
 	int ory = ogy-ogy%cy;
 	auto draw = [&](int x, int y, bool flipped, float rotation) {
@@ -114,18 +112,18 @@ void NLS::Back::Draw() {
 	};
 	//TODO - Look into drawing a single tiled primitive when cx/cy = width/height
 	auto drawhorz = [&]() {
-		for(int i = (x+ax-View.x+ox+orx)%cx-cx+View.x-ox; i+ox < View.x+800+cx+orx; i += cx) {
+		for(int i = (x+ax-View::x+ox+orx)%cx-cx+View::x-ox; i+ox < View::x+800+cx+orx; i += cx) {
 			draw(i+ox, y+oy+ay, f, ang);
 		}
 	};
 	auto drawvert = [&]() {
-		for(int j = (y+ay-View.y+oy+ory)%cy-cy+View.y-oy; j+oy < View.y+600+cy+ory; j += cy) {
+		for(int j = (y+ay-View::y+oy+ory)%cy-cy+View::y-oy; j+oy < View::y+600+cy+ory; j += cy) {
 			draw(x+ox+ax, j+oy, f, ang);
 		}
 	};
 	auto drawboth = [&]() {
-		for(int i = (x+ax-View.x+ox+orx)%cx-cx+View.x-ox; i+ox < View.x+800+cx+orx; i += cx) {
-			for(int j = (y+ay-View.y+oy+ory)%cy-cy+View.y-oy; j+oy < View.y+600+cy+ory; j += cy) {
+		for(int i = (x+ax-View::x+ox+orx)%cx-cx+View::x-ox; i+ox < View::x+800+cx+orx; i += cx) {
+			for(int j = (y+ay-View::y+oy+ory)%cy-cy+View::y-oy; j+oy < View::y+600+cy+ory; j += cy) {
 				draw(i+ox, j+oy, f, ang);
 			}
 		}
@@ -144,23 +142,23 @@ void NLS::Back::Draw() {
 		drawboth();
 		break;
 	case 4:
-		ax += Time.tdelta*rx/200;
+		ax += Time::tdelta*rx*5;
 		drawhorz();
 		break;
 	case 5:
-		ay += Time.tdelta*ry/200;
+		ay += Time::tdelta*ry*5;
 		drawvert();
 		break;
 	case 6:
-		ax += Time.tdelta*rx/200;
+		ax += Time::tdelta*rx*5;
 		drawboth();
 		break;
 	case 7:
-		ay += Time.tdelta*ry/200;
+		ay += Time::tdelta*ry*5;
 		drawboth();
 		break;
 	default:
-		C("WZ") << "Unknown background type " << type << endl;
+		cerr << "Unknown background type " << type << endl;
 		throw(273);
 		break;
 	}

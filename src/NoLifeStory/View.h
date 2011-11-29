@@ -3,16 +3,15 @@
 // Please see SuperGlobal.h for more information. //
 ////////////////////////////////////////////////////
 namespace NLS {
-	class _View {
-	public:
-		int x, y;
-		double vx, vy;
-		double tx, ty;
-		int xmin, xmax, ymin, ymax;
-		bool relative;
-		int width, height;
+	namespace View {
+		extern int x, y;
+		extern double vx, vy;
+		extern double tx, ty;
+		extern int xmin, xmax, ymin, ymax;
+		extern int width, height;
+		extern bool relative;
+		void Init();
 		void Step();
 		void Reset();
-		_View();
-	} extern View;
-};
+	}
+}

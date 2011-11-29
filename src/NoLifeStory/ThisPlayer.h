@@ -6,5 +6,9 @@ namespace NLS {
 	class _ThisPlayer : public Player {//The player that you control
 	public:
 		_ThisPlayer();
-	} extern ThisPlayer;
-};
+		void Draw();
+		void UsePortal();
+		double pdelay;
+	};
+	extern _ThisPlayer* ThisPlayer;
+}

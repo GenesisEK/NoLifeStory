@@ -7,6 +7,30 @@
 #define degtorad 0.01745329251994329576923690768489
 #define radtodeg 57.295779513082320876798154814105
 
+inline u32string u32(const string& str) {
+	static char32_t s[1024];
+	char32_t* end = sf::Utf8::ToUtf32(str.begin(), str.end(), s);
+	return u32string(s, end);
+}
+inline string u8(const u32string& str) {
+	static char s[1024];
+	char* end = sf::Utf32::ToUtf8(str.begin(), str.end(), s);
+	return string(s, end);
+}
+
+inline void pad(string& str, char c, size_t l) {
+	str.insert(0, l-str.size(), c);
+}
+inline vector<string> split(const string& str, char c) {
+	stringstream ss(str);
+	string s;
+	vector<string> sp;
+	while (getline(ss, s, c)) {
+		sp.push_back(s);
+	}
+	return sp;
+}
+
 inline string tostring(const double& t) {
 	static char str[32];
 	sprintf(str, "%f", t);
@@ -19,39 +43,38 @@ inline string tostring(const int& t) {
 	return str;
 }
 
-inline string tostring(const int& t, const int& len) {
-	stringstream ss;
-	ss << t;
-	string s = ss.str();
-	return s.insert(0, len-s.size(), '0');
+inline string tostring(const int& t, const int& n) {
+	string s = tostring(t);
+	pad(s, '0', n);
+	return s;
 }
 
 inline double todouble(const string& t) {
-	stringstream ss;
-	ss << t;
-	double d;
-	ss >> d;
-	return d;
+	return strtod(t.c_str(), 0);
 }
 
 inline int toint(const string& t) {
-	stringstream ss;
-	ss << t;
-	int d;
-	ss >> d;
-	return d;
+	return strtol(t.c_str(), 0, 10);
 }
 
 inline double sqr(const double& x) {
 	return x*x;
 }
 
+inline double pdis(const double& x, const double& y) {
+	return sqrt(sqr(x)+sqr(y));
+}
+
 inline double pdis(const double& x1, const double& y1, const double& x2, const double& y2) {
-	return sqrt(sqr(x1-x2)+sqr(y1-y2));
+	return pdis(x2-x1, y2-y1);
+}
+
+inline double pdir(const double& x, const double& y) {
+	return radtodeg*atan2(y, x);
 }
 
 inline double pdir(const double& x1, const double& y1, const double& x2, const double& y2) {
-	return radtodeg*atan2(y2-y1, x2-x1);
+	return pdir(x2-x1, y2-y1);
 }
 
 inline double ldx (const double& len, const double& dir) {
@@ -70,9 +93,53 @@ inline double sign (const double& x) {
 	return x>0?1:x<0?-1:0;
 }
 
-inline bool exists (const string& name) {
-	ifstream file(name);
-	bool check = file.is_open();
-	file.close();
-	return check;
+inline int pot(int x) {
+	x--;
+	for (int i = 1; i < 32; i <<= 1) {
+		x = x|x>>i;
+	}
+	return x+1;
 }
+
+string GetClipboardText() {
+#ifdef NLS_WINDOWS
+	if (OpenClipboard(nullptr)) {
+		char* clip = (char*)GetClipboardData(CF_TEXT);
+		return clip;
+	}
+#else
+#endif
+	return string();
+}
+
+#ifndef NLS_TR2
+class path : public string {
+public:
+	path() : string() {}
+	path(const string& s) : string(s) {}
+	path(const string&& s) : string(s) {}
+	path(const char* s) : string(s) {}
+	path(const path& s) : string(s) {}
+	path& operator/= (path other) {
+		if (length() > 1 and (at(length()-1) == '/' or at(length()-1) == '\\')) {
+			erase(length()-1);
+		}
+		if (other.length() > 0 and (other.at(0) == '/' or other.at(0) == '\\')) {
+			other.erase(0,1);
+		}
+		if (!empty()) {
+			*this += '/';
+		}
+		*this += other;
+		return *this;
+	}
+	path operator/ (path other) {
+		path result = *this;
+		return result /= other;
+	}
+};
+inline bool exists (const path& name) {
+	struct stat info;
+	return stat(name.c_str(),&info) == 0;
+}
+#endif

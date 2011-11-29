@@ -9,8 +9,9 @@ namespace NLS {
 		GLuint texture;
 		GLint width, height;
 		GLint originx, originy;
-		bool loaded;
+		GLint fw, fh;
 		class PNGProperty* png;
+		bool loaded;
 	};
 	class Sprite {
 	public:
@@ -21,4 +22,4 @@ namespace NLS {
 		SpriteData* data;
 		static deque <SpriteData*> loaded;
 	};
-};
+}
